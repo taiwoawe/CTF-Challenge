@@ -1,4 +1,4 @@
-The challenge is to attack the Lord of the Ring machine.
+The challenge is to attack the Lord of the Root machine.
 
 Steps.
 1. Create a new folder on your kali linux desktop where all files that relate to this ctf challenge would be saved. Open the host so the it is live.
